@@ -64,12 +64,12 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 
 		if "NVDAAddOn" in user_preferences:
 			# set the categories selection to what we used on last run
-			self.m_listBoxPreferencesTopic.SetSelection(user_preferences["NVDAAddOn"]["LastCategory"])
+			self._listBoxPreferencesTopic.SetSelection(user_preferences["NVDAAddOn"]["LastCategory"])
 			# show the appropriate dialogue page
-			self.m_simplebookPanelsCategories.SetSelection(self.m_listBoxPreferencesTopic.GetSelection())
+			self._simplebookPanelsCategories.SetSelection(self._listBoxPreferencesTopic.GetSelection())
 		else:
 			# set the categories selection to the first item
-			self.m_listBoxPreferencesTopic.SetSelection(0)
+			self._listBoxPreferencesTopic.SetSelection(0)
 			user_preferences["NVDAAddOn"] = {"LastCategory": "0"}
 		# populate the languages and braille codes
 		UserInterface.GetLanguages(self)
@@ -301,21 +301,21 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 				# add to the listbox the text for this language variant together with the code
 				regionalCode = language + "-" + subDir.upper()
 				if languagesDict.get(regionalCode, "missing") != "missing":
-					self.m_choiceLanguage.Append(f"{languagesDict[regionalCode]} ({language}-{subDir})")
+					self._choiceLanguage.Append(f"{languagesDict[regionalCode]} ({language}-{subDir})")
 				elif languagesDict.get(language, "missing") != "missing":
-					self.m_choiceLanguage.Append(f"{languagesDict[language]} ({regionalCode})")
+					self._choiceLanguage.Append(f"{languagesDict[language]} ({regionalCode})")
 				else:
-					self.m_choiceLanguage.Append(f"{language} ({regionalCode})")
+					self._choiceLanguage.Append(f"{language} ({regionalCode})")
 				return [os.path.basename(file) for file in glob.glob(os.path.join(subDir, "*_Rules.yaml"))]
 			return []
 
 		# initialise the language list
 		languagesDict = UserInterface.LanguagesDict()
 		# clear the language names in the dialog
-		self.m_choiceLanguage.Clear()
+		self._choiceLanguage.Clear()
 		# Translators: menu item -- use the language of the voice chosen in the NVDA speech settings dialog
 		# "Auto" == "Automatic" -- other items in menu are "English (en)", etc., so this matches that style
-		self.m_choiceLanguage.Append(_("Use Voice's Language (Auto)"))
+		self._choiceLanguage.Append(_("Use Voice's Language (Auto)"))
 		# populate the available language names in the dialog
 		# the implemented languages are in folders named using the relevant ISO 639-1
 		#   code https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
@@ -327,12 +327,12 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 				if len(self.get_rules_files(pathToLanguageDir, addRegionalLanguages)) > 0:
 					# add to the listbox the text for this language together with the code
 					if languagesDict.get(language, "missing") != "missing":
-						self.m_choiceLanguage.Append(languagesDict[language] + " (" + language + ")")
+						self._choiceLanguage.Append(languagesDict[language] + " (" + language + ")")
 					else:
-						self.m_choiceLanguage.Append(language + " (" + language + ")")
+						self._choiceLanguage.Append(language + " (" + language + ")")
 
 	def GetLanguageCode(self):
-		lang_selection = self.m_choiceLanguage.GetStringSelection()
+		lang_selection = self._choiceLanguage.GetStringSelection()
 		lang_code = lang_selection[lang_selection.find("(") + 1 : lang_selection.find(")")]
 		return lang_code
 
@@ -370,7 +370,7 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 			return all_style_files
 
 		# clear the SpeechStyle choices
-		self.m_choiceSpeechStyle.Clear()
+		self._choiceSpeechStyle.Clear()
 		# get the currently selected language code
 		languageCode = UserInterface.GetLanguageCode(self)
 
@@ -391,10 +391,10 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 		# Translators: at the moment, do NOT translate this string as some code specifically looks for this name.
 		all_style_files.append("LiteralSpeak")
 		for name in all_style_files:
-			self.m_choiceSpeechStyle.Append((name))
+			self._choiceSpeechStyle.Append((name))
 		try:
 			# set the SpeechStyle to the same as previous
-			self.m_choiceSpeechStyle.SetStringSelection(
+			self._choiceSpeechStyle.SetStringSelection(
 				this_SpeechStyle if this_SpeechStyle in all_style_files else all_style_files[0],
 			)
 		except Exception as e:
@@ -402,11 +402,11 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 				f"MathCAT: An exception occurred in GetSpeechStyles evaluating set SetStringSelection: {e}",
 			)
 			# that didn't work, choose the first in the list
-			self.m_choiceSpeechStyle.SetSelection(0)
+			self._choiceSpeechStyle.SetSelection(0)
 
 	def GetBrailleCodes(self):
 		# initialise the braille code list
-		self.m_choiceBrailleMathCode.Clear()
+		self._choiceBrailleMathCode.Clear()
 		# populate the available braille codes in the dialog
 		# the dir names are used, not the rule file names because the dir names have to be unique
 		pathToBrailleFolder = UserInterface.pathToBrailleFolder()
@@ -414,21 +414,21 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 			pathToBrailleCode = os.path.join(pathToBrailleFolder, braille_code)
 			if os.path.isdir(pathToBrailleCode):
 				if len(self.get_rules_files(pathToBrailleCode, None)) > 0:
-					self.m_choiceBrailleMathCode.Append(braille_code)
+					self._choiceBrailleMathCode.Append(braille_code)
 
 	def set_ui_values(self):
 		# set the UI elements to the ones read from the preference file(s)
 		try:
-			self.m_choiceImpairment.SetSelection(
+			self._choiceImpairment.SetSelection(
 				Speech_Impairment.index(user_preferences["Speech"]["Impairment"]),
 			)
 			try:
 				lang_pref = user_preferences["Speech"]["Language"]
-				self.m_choiceLanguage.SetSelection(0)
+				self._choiceLanguage.SetSelection(0)
 				i = 1  # no need to test i == 0
-				while i < self.m_choiceLanguage.GetCount():
-					if f"({lang_pref})" in self.m_choiceLanguage.GetString(i):
-						self.m_choiceLanguage.SetSelection(i)
+				while i < self._choiceLanguage.GetCount():
+					if f"({lang_pref})" in self._choiceLanguage.GetString(i):
+						self._choiceLanguage.SetSelection(i)
 						break
 					i += 1
 			except Exception as e:
@@ -437,23 +437,23 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 				)
 				# the language in the settings file is not in the folder structure, something went wrong,
 				# set to the first in the list
-				self.m_choiceLanguage.SetSelection(0)
+				self._choiceLanguage.SetSelection(0)
 			try:
 				# now get the available SpeechStyles from the folder structure and set to the preference setting is possible
 				self.GetSpeechStyles(str(user_preferences["Speech"]["SpeechStyle"]))
 			except Exception as e:
 				log.exception(f"MathCAT: An exception occurred in set_ui_values (getting SpeechStyle): {e}")
-				self.m_choiceSpeechStyle.Append(
-					"Error when setting SpeechStyle for " + self.m_choiceLanguage.GetStringSelection(),
+				self._choiceSpeechStyle.Append(
+					"Error when setting SpeechStyle for " + self._choiceLanguage.GetStringSelection(),
 				)
 			# set the rest of the UI elements
-			self.m_choiceDecimalSeparator.SetSelection(
+			self._choiceDecimalSeparator.SetSelection(
 				Speech_DecimalSeparator.index(user_preferences["Other"]["DecimalSeparator"]),
 			)
-			self.m_choiceSpeechAmount.SetSelection(
+			self._choiceSpeechAmount.SetSelection(
 				Speech_Verbosity.index(user_preferences["Speech"]["Verbosity"]),
 			)
-			self.m_sliderRelativeSpeed.SetValue(user_preferences["Speech"]["MathRate"])
+			self._sliderRelativeSpeed.SetValue(user_preferences["Speech"]["MathRate"])
 			pause_factor = (
 				0
 				if int(user_preferences["Speech"]["PauseFactor"]) <= 1
@@ -464,93 +464,93 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 					),
 				)
 			)
-			self.m_sliderPauseFactor.SetValue(pause_factor)
-			self.m_checkBoxSpeechSound.SetValue(user_preferences["Speech"]["SpeechSound"] == "Beep")
-			self.m_choiceSpeechForChemical.SetSelection(
+			self._sliderPauseFactor.SetValue(pause_factor)
+			self._checkBoxSpeechSound.SetValue(user_preferences["Speech"]["SpeechSound"] == "Beep")
+			self._choiceSpeechForChemical.SetSelection(
 				Speech_Chemistry.index(user_preferences["Speech"]["Chemistry"]),
 			)
 
-			self.m_choiceNavigationMode.SetSelection(
+			self._choiceNavigationMode.SetSelection(
 				Navigation_NavMode.index(user_preferences["Navigation"]["NavMode"]),
 			)
-			self.m_checkBoxResetNavigationMode.SetValue(user_preferences["Navigation"]["ResetNavMode"])
-			self.m_choiceSpeechAmountNavigation.SetSelection(
+			self._checkBoxResetNavigationMode.SetValue(user_preferences["Navigation"]["ResetNavMode"])
+			self._choiceSpeechAmountNavigation.SetSelection(
 				Navigation_NavVerbosity.index(user_preferences["Navigation"]["NavVerbosity"]),
 			)
 			if user_preferences["Navigation"]["Overview"]:
-				self.m_choiceNavigationSpeech.SetSelection(1)
+				self._choiceNavigationSpeech.SetSelection(1)
 			else:
-				self.m_choiceNavigationSpeech.SetSelection(0)
-			self.m_checkBoxResetNavigationSpeech.SetValue(user_preferences["Navigation"]["ResetOverview"])
-			self.m_checkBoxAutomaticZoom.SetValue(user_preferences["Navigation"]["AutoZoomOut"])
-			self.m_choiceCopyAs.SetSelection(
+				self._choiceNavigationSpeech.SetSelection(0)
+			self._checkBoxResetNavigationSpeech.SetValue(user_preferences["Navigation"]["ResetOverview"])
+			self._checkBoxAutomaticZoom.SetValue(user_preferences["Navigation"]["AutoZoomOut"])
+			self._choiceCopyAs.SetSelection(
 				Navigation_CopyAs.index(user_preferences["Navigation"]["CopyAs"]),
 			)
 
-			self.m_choiceBrailleHighlights.SetSelection(
+			self._choiceBrailleHighlights.SetSelection(
 				Braille_BrailleNavHighlight.index(user_preferences["Braille"]["BrailleNavHighlight"]),
 			)
 			try:
 				braille_pref = user_preferences["Braille"]["BrailleCode"]
 				i = 0
-				while braille_pref != self.m_choiceBrailleMathCode.GetString(i):
+				while braille_pref != self._choiceBrailleMathCode.GetString(i):
 					i = i + 1
-					if i == self.m_choiceBrailleMathCode.GetCount():
+					if i == self._choiceBrailleMathCode.GetCount():
 						break
-				if braille_pref == self.m_choiceBrailleMathCode.GetString(i):
-					self.m_choiceBrailleMathCode.SetSelection(i)
+				if braille_pref == self._choiceBrailleMathCode.GetString(i):
+					self._choiceBrailleMathCode.SetSelection(i)
 				else:
-					self.m_choiceBrailleMathCode.SetSelection(0)
+					self._choiceBrailleMathCode.SetSelection(0)
 			except Exception as e:
 				log.exception(f"MathCAT: An exception occurred while trying to set the Braille code: {e}")
 				# the braille code in the settings file is not in the folder structure, something went wrong,
 				# set to the first in the list
-				self.m_choiceBrailleMathCode.SetSelection(0)
+				self._choiceBrailleMathCode.SetSelection(0)
 		except KeyError as err:
 			print("Key not found", err)
 
 	def get_ui_values(self):
 		global user_preferences
 		# read the values from the UI and update the user preferences dictionary
-		user_preferences["Speech"]["Impairment"] = Speech_Impairment[self.m_choiceImpairment.GetSelection()]
+		user_preferences["Speech"]["Impairment"] = Speech_Impairment[self._choiceImpairment.GetSelection()]
 		user_preferences["Speech"]["Language"] = self.GetLanguageCode()
 		user_preferences["Other"]["DecimalSeparator"] = Speech_DecimalSeparator[
-			self.m_choiceDecimalSeparator.GetSelection()
+			self._choiceDecimalSeparator.GetSelection()
 		]
-		user_preferences["Speech"]["SpeechStyle"] = self.m_choiceSpeechStyle.GetStringSelection()
-		user_preferences["Speech"]["Verbosity"] = Speech_Verbosity[self.m_choiceSpeechAmount.GetSelection()]
-		user_preferences["Speech"]["MathRate"] = self.m_sliderRelativeSpeed.GetValue()
-		pf_slider = self.m_sliderPauseFactor.GetValue()
+		user_preferences["Speech"]["SpeechStyle"] = self._choiceSpeechStyle.GetStringSelection()
+		user_preferences["Speech"]["Verbosity"] = Speech_Verbosity[self._choiceSpeechAmount.GetSelection()]
+		user_preferences["Speech"]["MathRate"] = self._sliderRelativeSpeed.GetValue()
+		pf_slider = self._sliderPauseFactor.GetValue()
 		pause_factor = (
 			0 if pf_slider == 0 else round(PAUSE_FACTOR_SCALE * math.pow(PAUSE_FACTOR_LOG_BASE, pf_slider))
 		)  # avoid log(0)
 		user_preferences["Speech"]["PauseFactor"] = pause_factor
-		if self.m_checkBoxSpeechSound.GetValue():
+		if self._checkBoxSpeechSound.GetValue():
 			user_preferences["Speech"]["SpeechSound"] = "Beep"
 		else:
 			user_preferences["Speech"]["SpeechSound"] = "None"
 		user_preferences["Speech"]["Chemistry"] = Speech_Chemistry[
-			self.m_choiceSpeechForChemical.GetSelection()
+			self._choiceSpeechForChemical.GetSelection()
 		]
 		user_preferences["Navigation"]["NavMode"] = Navigation_NavMode[
-			self.m_choiceNavigationMode.GetSelection()
+			self._choiceNavigationMode.GetSelection()
 		]
-		user_preferences["Navigation"]["ResetNavMode"] = self.m_checkBoxResetNavigationMode.GetValue()
+		user_preferences["Navigation"]["ResetNavMode"] = self._checkBoxResetNavigationMode.GetValue()
 		user_preferences["Navigation"]["NavVerbosity"] = Navigation_NavVerbosity[
-			self.m_choiceSpeechAmountNavigation.GetSelection()
+			self._choiceSpeechAmountNavigation.GetSelection()
 		]
-		user_preferences["Navigation"]["Overview"] = self.m_choiceNavigationSpeech.GetSelection() != 0
-		user_preferences["Navigation"]["ResetOverview"] = self.m_checkBoxResetNavigationSpeech.GetValue()
-		user_preferences["Navigation"]["AutoZoomOut"] = self.m_checkBoxAutomaticZoom.GetValue()
-		user_preferences["Navigation"]["CopyAs"] = Navigation_CopyAs[self.m_choiceCopyAs.GetSelection()]
+		user_preferences["Navigation"]["Overview"] = self._choiceNavigationSpeech.GetSelection() != 0
+		user_preferences["Navigation"]["ResetOverview"] = self._checkBoxResetNavigationSpeech.GetValue()
+		user_preferences["Navigation"]["AutoZoomOut"] = self._checkBoxAutomaticZoom.GetValue()
+		user_preferences["Navigation"]["CopyAs"] = Navigation_CopyAs[self._choiceCopyAs.GetSelection()]
 
 		user_preferences["Braille"]["BrailleNavHighlight"] = Braille_BrailleNavHighlight[
-			self.m_choiceBrailleHighlights.GetSelection()
+			self._choiceBrailleHighlights.GetSelection()
 		]
-		user_preferences["Braille"]["BrailleCode"] = self.m_choiceBrailleMathCode.GetStringSelection()
+		user_preferences["Braille"]["BrailleCode"] = self._choiceBrailleMathCode.GetStringSelection()
 		if "NVDAAddOn" not in user_preferences:
 			user_preferences["NVDAAddOn"] = {"LastCategory": "0"}
-		user_preferences["NVDAAddOn"]["LastCategory"] = self.m_listBoxPreferencesTopic.GetSelection()
+		user_preferences["NVDAAddOn"]["LastCategory"] = self._listBoxPreferencesTopic.GetSelection()
 
 	@staticmethod
 	def path_to_default_preferences():
@@ -698,7 +698,7 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 			yaml.dump(user_preferences, stream=f, allow_unicode=True)
 
 	def OnRelativeSpeedChanged(self, event):
-		rate = self.m_sliderRelativeSpeed.GetValue()
+		rate = self._sliderRelativeSpeed.GetValue()
 		# Translators: this is a test string that is spoken. Only translate "the square root of x squared plus y squared"
 		text = _("<prosody rate='XXX%'>the square root of x squared plus y squared</prosody>").replace(
 			"XXX",
@@ -708,8 +708,8 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 		speak(ConvertSSMLTextForNVDA(text))
 
 	def OnPauseFactorChanged(self, event):
-		rate = self.m_sliderRelativeSpeed.GetValue()
-		pf_slider = self.m_sliderPauseFactor.GetValue()
+		rate = self._sliderRelativeSpeed.GetValue()
+		pf_slider = self._sliderPauseFactor.GetValue()
 		pause_factor = (
 			0 if pf_slider == 0 else round(PAUSE_FACTOR_SCALE * math.pow(PAUSE_FACTOR_LOG_BASE, pf_slider))
 		)
@@ -756,11 +756,11 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 
 	def OnListBoxCategories(self, event):
 		# the category changed, now show the appropriate dialogue page
-		self.m_simplebookPanelsCategories.SetSelection(self.m_listBoxPreferencesTopic.GetSelection())
+		self._simplebookPanelsCategories.SetSelection(self._listBoxPreferencesTopic.GetSelection())
 
 	def OnLanguage(self, event):
 		# the language changed, get the SpeechStyles for the new language
-		UserInterface.GetSpeechStyles(self, self.m_choiceSpeechStyle.GetStringSelection())
+		UserInterface.GetSpeechStyles(self, self._choiceSpeechStyle.GetStringSelection())
 
 	def MathCATPreferencesDialogOnCharHook(self, event: wx.KeyEvent):
 		# designed choice is that Enter is the same as clicking OK, and Escape is the same as clicking Cancel
@@ -773,47 +773,47 @@ class UserInterface(MathCATgui.MathCATPreferencesDialog):
 		if keyCode == wx.WXK_TAB:
 			if event.GetModifiers() == wx.MOD_CONTROL:
 				# cycle the category forward
-				new_category = self.m_listBoxPreferencesTopic.GetSelection() + 1
+				new_category = self._listBoxPreferencesTopic.GetSelection() + 1
 				if new_category == 3:
 					new_category = 0
-				self.m_listBoxPreferencesTopic.SetSelection(new_category)
+				self._listBoxPreferencesTopic.SetSelection(new_category)
 				# update the ui to show the new page
 				UserInterface.OnListBoxCategories(self, event)
 				# set the focus into the category list box
-				self.m_listBoxPreferencesTopic.SetFocus()
+				self._listBoxPreferencesTopic.SetFocus()
 				# jump out so the tab key is not processed
 				return
 			if event.GetModifiers() == wx.MOD_CONTROL | wx.MOD_SHIFT:
 				# cycle the category back
-				new_category = self.m_listBoxPreferencesTopic.GetSelection() - 1
+				new_category = self._listBoxPreferencesTopic.GetSelection() - 1
 				if new_category == -1:
 					new_category = 2
-				self.m_listBoxPreferencesTopic.SetSelection(new_category)
+				self._listBoxPreferencesTopic.SetSelection(new_category)
 				# update the ui to show the new page
 				UserInterface.OnListBoxCategories(self, event)
 				# update the ui to show the new page
-				self.m_listBoxPreferencesTopic.SetFocus()
+				self._listBoxPreferencesTopic.SetFocus()
 				# jump out so the tab key is not processed
 				return
 			if event.GetModifiers() == wx.MOD_NONE and (
-				MathCATgui.MathCATPreferencesDialog.FindFocus() == self.m_listBoxPreferencesTopic
+				MathCATgui.MathCATPreferencesDialog.FindFocus() == self._listBoxPreferencesTopic
 			):
-				if self.m_listBoxPreferencesTopic.GetSelection() == 0:
-					self.m_choiceImpairment.SetFocus()
-				elif self.m_listBoxPreferencesTopic.GetSelection() == 1:
-					self.m_choiceNavigationMode.SetFocus()
-				elif self.m_listBoxPreferencesTopic.GetSelection() == 2:
-					self.m_choiceBrailleMathCode.SetFocus()
+				if self._listBoxPreferencesTopic.GetSelection() == 0:
+					self._choiceImpairment.SetFocus()
+				elif self._listBoxPreferencesTopic.GetSelection() == 1:
+					self._choiceNavigationMode.SetFocus()
+				elif self._listBoxPreferencesTopic.GetSelection() == 2:
+					self._choiceBrailleMathCode.SetFocus()
 				return
 			if (event.GetModifiers() == wx.MOD_SHIFT) and (
-				MathCATgui.MathCATPreferencesDialog.FindFocus() == self.m_buttonOK
+				MathCATgui.MathCATPreferencesDialog.FindFocus() == self._buttonOK
 			):
-				if self.m_listBoxPreferencesTopic.GetSelection() == 0:
-					self.m_choiceSpeechForChemical.SetFocus()
-				elif self.m_listBoxPreferencesTopic.GetSelection() == 1:
-					self.m_choiceSpeechAmountNavigation.SetFocus()
-				elif self.m_listBoxPreferencesTopic.GetSelection() == 2:
-					self.m_choiceBrailleHighlights.SetFocus()
+				if self._listBoxPreferencesTopic.GetSelection() == 0:
+					self._choiceSpeechForChemical.SetFocus()
+				elif self._listBoxPreferencesTopic.GetSelection() == 1:
+					self._choiceSpeechAmountNavigation.SetFocus()
+				elif self._listBoxPreferencesTopic.GetSelection() == 2:
+					self._choiceBrailleHighlights.SetFocus()
 				return
 		# continue handling keyboard event
 		event.Skip()
